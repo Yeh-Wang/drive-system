@@ -28,7 +28,7 @@
       </el-header>
       <el-container>
         <el-aside width="200px">
-          <AsideComponent :subject="subjectType" @event="changeAside"/>
+          <AsideComponent :key="new Date().getTime()" :subject="subjectType" @event="changeAside"/>
         </el-aside>
         <el-main>
           <router-view :subject="subjectType"></router-view>
@@ -41,8 +41,10 @@
 <script setup lang="ts">
 import {ref} from "vue";
 import AsideComponent from "@/components/RegularUser/AsideComponent.vue";
-import {useRouter} from "vue-router";
 import router from "@/router";
+import {useAppStore} from "@/stores/state";
+
+const appStore = useAppStore()
 
 // <!-- 导航栏组件 -->
 const activeIndex = ref('1')
@@ -77,6 +79,7 @@ const changeAside = (aside_index: string) => {
   }else if (aside_index == "2"){
     router.push({path: '/regularUser/'+learnRouter.value})
   }else if (aside_index == "3"){
+    router.push({path: '/regularUser/bookExam/'+subjectType.value})
   }else if (aside_index == "4"){
   }
 }

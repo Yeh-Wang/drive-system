@@ -1,16 +1,47 @@
-<script setup lang="ts">
-const emit = defineEmits(["event1"])
-</script>
-
 <template>
-  <el-breadcrumb separator="/">
+  <el-breadcrumb separator=">>">
     <el-breadcrumb-item>
       <el-button icon="back" type="text" @click="emit('event1','8')">返回</el-button>
     </el-breadcrumb-item>
     <el-breadcrumb-item style="padding-top:8px"><el-text size="small">视频学习</el-text></el-breadcrumb-item>
   </el-breadcrumb>
+
+  <div>
+<!--    <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">-->
+<!--      <el-tab-pane label="User" name="first">-->
+<!--        <VideoGrid />-->
+<!--      </el-tab-pane>-->
+<!--      <el-tab-pane label="Config" name="second">-->
+<!--        <VideoGrid/>-->
+<!--      </el-tab-pane>-->
+<!--      <el-tab-pane label="Role" name="third">-->
+<!--        <VideoGrid/>-->
+<!--      </el-tab-pane>-->
+<!--      <el-tab-pane label="Task" name="fourth">-->
+<!--        <VideoGrid/>-->
+<!--      </el-tab-pane>-->
+<!--    </el-tabs>-->
+    <VideoGrid :subject="props.subject"/>
+  </div>
 </template>
 
-<style scoped>
+<script setup lang="ts">
+import {onMounted, ref} from "vue";
+import VideoGrid from "@/components/RegularUser/MainComponents/Learn/LearnOneView/VideoGrid.vue";
 
+const emit = defineEmits(["event1"])
+const props = defineProps(["subject"]) // 从父组件获取数据:当前学科
+
+onMounted(() => {
+  console.log("LearnVideoView mounted")
+})
+</script>
+
+<style scoped>
+.demo-tabs > .el-tabs__content {
+  padding: 32px;
+  color: #6b778c;
+  font-size: 32px;
+  font-weight: 600;
+}
 </style>

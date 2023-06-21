@@ -37,8 +37,8 @@ const backQuestion = (learnTime:string) =>{
 
 <template>
   <div v-show="showLearn">
-    <LearnVideoView v-if="showVideoLearn" @event1="backVideo"/>
-    <LearnQuestionView v-else @event2="backQuestion"/>
+    <LearnVideoView v-if="showVideoLearn" @event1="backVideo" :subject="props.subject"/>
+    <LearnQuestionView v-else @event2="backQuestion" :subject="props.subject"/>
   </div>
 
   <div v-show="!showLearn">

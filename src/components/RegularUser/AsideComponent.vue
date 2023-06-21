@@ -1,6 +1,6 @@
 <template>
   <el-menu
-      default-active="1"
+      :default-active="defaultActive"
       class="el-menu-vertical-demo"
       @select="handleSelect"
   >
@@ -25,8 +25,11 @@
 
 <script setup lang="ts">
 import {Document, Setting} from "@element-plus/icons-vue";
+import {ref} from "vue";
 
 const emit = defineEmits(["event"])
+const props = defineProps(["subject"]) // 从父组件获取数据:当前学科
+const defaultActive = ref("1")
 const handleSelect = (key: string, keyPath: string[]) => {
   if(key == "1"){
     emit("event", "1")
@@ -38,6 +41,7 @@ const handleSelect = (key: string, keyPath: string[]) => {
     emit("event", "4")
   }
 }
+
 </script>
 
 <style scoped>

@@ -99,7 +99,6 @@
         <el-form-item>
           <el-button id="okButton" type="success" icon="check" @click="handleRegister('form')">Submit</el-button>
           <el-button id="Res" type="primary" icon="back" @click="showLogin">Back</el-button>
-
         </el-form-item>
       </el-form>
     </div>
@@ -112,14 +111,14 @@
 
 <script lang="ts">
 import {defineComponent, ref} from 'vue';
-import {CardType, Gender} from "@/utils/gender";
 import EluiChinaAreaDht from "elui-china-area-dht";
 import type {UploadUserFile} from 'element-plus'
 import {ElMessage, ElMessageBox} from "element-plus";
-import axios from "axios";
 import OSS from "ali-oss";
 import router from "@/router";
 import {acessKey, acessKeyId} from "@/utils/apiKey";
+import {CardType, Gender} from "@/utils/gender";
+import * as string_decoder from "string_decoder";
 
 export default defineComponent({
   name: 'Login',
@@ -156,11 +155,12 @@ export default defineComponent({
         grade: 0
       },
       signForm: {
+        id:"",  // id
         name: '', // 姓名
         age: 0,  // 年龄
         gender: Gender.male,  // 性别
         address: '',  // 地址
-        // personCard: '',  // 身份证号
+        personCard: '',  // 身份证照片
         type: CardType.typeTwo,  // 报考类型
         phone: '',  // 手机号
         file: '',  // 上传文件

@@ -38,6 +38,11 @@ const router = createRouter({
                     path: 'LearnTwo',
                     name: 'LearnTwo',
                     component: () => import('@/components/RegularUser/MainComponents/Learn/LearnTwo.vue')
+                },
+                {
+                    path: 'bookExam/:subjectId',
+                    name: 'bookExam',
+                    component: () => import('@/components/RegularUser/MainComponents/bookExam/BookExam.vue')
                 }
             ]
         }

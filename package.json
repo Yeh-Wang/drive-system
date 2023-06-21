@@ -10,7 +10,7 @@
     "type-check": "vue-tsc --noEmit -p tsconfig.app.json --composite false"
   },
   "dependencies": {
-    "@vueuse/core": "^10.1.2",
+    "@vueuse/core": "^10.2.0",
     "axios": "^1.4.0",
     "element-plus": "^2.3.6",
     "elui-china-area-dht": "^2.0.0",
@@ -18,7 +18,9 @@
     "v-scale-screen": "^2.2.0",
     "vue": "^3.3.2",
     "vue-demi": "^0.14.5",
-    "vue-router": "^4.2.0"
+    "vue-lazyload": "^3.0.0",
+    "vue-router": "^4.2.0",
+    "vue3-lazyload": "^0.3.6"
   },
   "devDependencies": {
     "@tsconfig/node18": "^2.0.1",
