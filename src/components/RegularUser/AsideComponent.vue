@@ -18,7 +18,7 @@
       <span>预约考试</span>
     </el-menu-item>
     <el-menu-item index="4">
-      <span>学习与考试统计</span>
+      <span>考试</span>
     </el-menu-item>
   </el-menu>
 </template>

@@ -2,7 +2,7 @@
   <el-row>
     <el-col :span="3">
       <div ref="el" :style="style" style="position: fixed">
-        <el-card v-model="bookExam"
+        <el-card v-model="bookExamInfo"
                  class="info-card">
           <div>
             <el-icon>
@@ -11,12 +11,12 @@
           </div>
           <h3>预约信息</h3>
           <p>预约考试时间: <br>
-            <el-text type="success"> {{ bookExam.bookDate }}
+            <el-text type="success"> {{ bookExamInfo.time }}
             </el-text>
           </p>
           <!--        <p>预约考试地点: <br> <el-text type="success">{{ bookExam.bookPlace }}</el-text></p>-->
           <p>预约考试科目: <br>
-            <el-text type="success">{{ bookExam.bookSubject }}</el-text>
+            <el-text type="success">{{ bookExamInfo.subjectType }}</el-text>
           </p>
           <el-button
               id="submitBut"
@@ -48,6 +48,9 @@ import {ref} from 'vue';
 import {ElCalendar, ElButton, ElMessage} from 'element-plus';
 import {useDraggable} from "@vueuse/core";
 import {useRouter} from "vue-router";
+import type {bookExam} from "@/utils/data-entity";
+import {reactive} from "vue-demi";
+import {request} from "@/utils/request";
 
 const router = useRouter();
 const currentSubject = router.currentRoute.value.params.subjectId;
@@ -58,6 +61,15 @@ const bookExam = ref({ // 预约考试信息
   bookPlace: "??",
   bookSubject: currentSubject
 })
+const bookExamInfo:bookExam = reactive({
+  id: "",
+  name: "",
+  studentId: "",
+  subjectType: currentSubject as string,
+  time: "",
+  type: "",
+  isPass: 0,
+})
 // 可以使用 disabledDate 方法来禁用不可选日期
 const disabledDate = (time: Date): string => {
   // 在这里根据需要进行日期的禁用判断
@@ -66,7 +78,7 @@ const disabledDate = (time: Date): string => {
   if ((otherTime.getMonth() >= time.getMonth()) && (otherTime.getDate() >= time.getDate())) {
     return '❌';
   } else {
-    bookExam.value.bookDate = time.getFullYear() + "-" + (time.getMonth() + 1) + "-" + time.getDate();
+    bookExamInfo.time = time.getFullYear() + "-" + (time.getMonth() + 1) + "-" + time.getDate();
     return '✔️';
   }
 };
@@ -85,13 +97,18 @@ const submitForm = () => {
       type: 'warning'
     });
     return;
+  }else{
+    console.log(bookExamInfo);
+    request.post("/driveservice/book-exam/bookExam/"+"1",bookExamInfo).then(res=>{
+      console.log(res.data.message);
+    })
   }
+
 
   // 创建考试的逻辑
   const examData = {
     date: selectedDate.value
   };
-
   // createExam(examData)
   //     .then(response => {
   //       // 处理成功响应

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h2>试题列表</h2>
+    <h2>试题练习</h2>
 <!--    <el-table-->
 <!--        :data="questionsInfo.question"-->
 <!--        style="width: 100%"-->
@@ -22,99 +22,99 @@
 <!--      </el-table-column>-->
 <!--    </el-table>-->
 
-    <el-table :data="filterTableData" style="width: 100%">
-      <el-table-column label="Title" prop="title" />
-      <el-table-column label="Type" prop="type" />
-      <el-table-column align="right">
-        <template #header>
-          <el-input v-model="search" size="small" placeholder="Type to search" />
-        </template>
-        <template #default="scope">
-          <el-button size="small" @click="handleEdit(scope.$index, scope.row)"
-          >Edit</el-button
-          >
-          <el-button
-              size="small"
-              type="danger"
-              @click="handleDelete(scope.$index, scope.row)"
-          >Delete</el-button
-          >
-        </template>
-      </el-table-column>
-    </el-table>
+<!--    <el-table :data="filterTableData" style="width: 100%">-->
+<!--      <el-table-column label="Title" prop="title" />-->
+<!--      <el-table-column label="Type" prop="type" />-->
+<!--      <el-table-column align="right">-->
+<!--        <template #header>-->
+<!--          <el-input v-model="search" size="small" placeholder="Type to search" />-->
+<!--        </template>-->
+<!--        <template #default="scope">-->
+<!--          <el-button size="small" @click="handleEdit(scope.$index, scope.row)"-->
+<!--          >Edit</el-button-->
+<!--          >-->
+<!--          <el-button-->
+<!--              size="small"-->
+<!--              type="danger"-->
+<!--              @click="handleDelete(scope.$index, scope.row)"-->
+<!--          >Delete</el-button-->
+<!--          >-->
+<!--        </template>-->
+<!--      </el-table-column>-->
+<!--    </el-table>-->
+
+    <el-row v-for="(item,index) in questionInfo.question" :key="index">
+      <el-col :span="24">
+        <div>
+          <span>{{ item.content }}</span>
+        </div>
+
+        <el-checkbox-group v-if="item.type==2" v-model="item.choose">
+          <el-checkbox v-for="(option,index1) in item.optionsList"  :key="index1" :label="option.content">
+
+          </el-checkbox>
+        </el-checkbox-group>
+        <el-radio-group v-if="item.type==1 || item.type==3" v-model="item.choose[0]">
+          <el-radio v-for="(option2,index2) in item.optionsList"  :key="index2" :label="option2.content" >
+            {{ option2.content }}
+          </el-radio>
+        </el-radio-group>
+      </el-col>
+    </el-row>
+    <el-button type="primary" @click="showData">
+      提交
+    </el-button>
   </div>
 </template>
 
 <script setup lang="ts">
 import {computed, onMounted, ref} from "vue";
 import Lazyload from "vue3-lazyload";
-import {reactive} from "vue-demi";
-import {descriptionProps} from "element-plus"; // 引入 vue3-lazyload 库
+import type {questionInfo, questionOptionInfo} from "@/utils/data-entity";
+import {request} from "@/utils/request";
 
 const props = defineProps(['subject'])// 从父组件获取数据:当前学科
 
-
-const questionsInfo = reactive({
-  question: [{
-    title: "test",
-    description: "1+1=?",
-    answer: "2",
-    type: "判断题",
-  },
-    {
-      title: "test",
-      description: "1+1=?",
-      answer: "2",
-      type: "选择题",
-    },
-    {
-      title: "test",
-      description: "1+1=?",
-      answer: "2",
-      type: "选择题",
-    },
-    {
-      title: "test",
-      description: "1+1=?",
-      answer: "2",
-      type: "选择题",
-    },
-    {
-      title: "test",
-      description: "1+1=?",
-      answer: "2",
-      type: "选择题",
-    },
-    {
-      title: "test",
-      description: "1+1=?",
-      answer: "2",
-      type: "选择题",
+const showData = () => {
+  questionInfo.value.question.forEach((item,index)=>{
+    if(item.choose[0]==''){
+      item.choose.splice(0,1)
     }
-  ]
-});
-const search = ref('')
-const filterTableData = computed(() =>
-    questionsInfo.question.filter(
-        (data) =>
-            !search.value ||
-            data.type.toLowerCase().includes(search.value.toLowerCase())
-    )
-)
-const handleEdit = (index, row) => {
-  console.log(index, row)
-}
-const handleDelete = (index, row) => {
-  console.log(index, row)
+  })
+  console.log(questionInfo.value.question)
+  request.post("/driveservice/question/getScore",questionInfo.value.question).then(res=>{
+    console.log(res.data)
+  })
 }
 
+const questionInfo = ref({
+  question:[{
+    id: "",        //题目id
+    content: "",   //题目内容
+    optionsList: ref<questionOptionInfo[]>([]),//选项列表
+    choose: [],  //选中
+    explain: "",   //解析
+    type: 0,      //题目类型  1单选 2多选 3判断
+    key: "",       //正确答案
+    isTrue: 0,    //是否正确
+  }]
+})
 
 onMounted(() => {
   fetchQuestions();
 });
 
+const chooseList = ref<string[]>([])
 const fetchQuestions = () => {
-  questionsInfo.question[0].title = "test";
+  request.get("/driveservice/question/generateExercise1").then(res=>{
+    // console.log(res.data.data.objects1)
+    questionInfo.value.question.splice(0,questionInfo.value.question.length)
+    questionInfo.value.question=res.data.data.objects1
+    questionInfo.value.question.forEach((item,index)=>{
+      item.choose=['']
+    })
+    // console.log(questionInfo.value.question)
+  })
 };
 
 const directives = {

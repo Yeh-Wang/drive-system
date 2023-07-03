@@ -15,7 +15,6 @@ import QuestionGrid from "@/components/RegularUser/MainComponents/Learn/LearnOne
 
 const emit = defineEmits(["event2"])
 const props = defineProps(["subject"]) // 从父组件获取数据:当前学科
-
 </script>
 
 <style scoped>

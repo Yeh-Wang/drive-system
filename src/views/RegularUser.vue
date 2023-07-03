@@ -20,7 +20,7 @@
           </el-col>
           <el-col :span="8" class="right-header">
             <el-row style="margin-left: 150px">
-              <p style="margin-top: 30px">dear,{{ userName }}</p>
+              <p style="margin-top: 30px">dear,{{ userId }}</p>
               <el-avatar style="margin-left: 10px;margin-top: 15px" size="default" src="src/assets/power.svg"/>
             </el-row>
           </el-col>
@@ -36,13 +36,17 @@
       </el-container>
     </el-container>
   </div>
+
 </template>
 
 <script setup lang="ts">
-import {ref} from "vue";
+import {onMounted, ref} from "vue";
 import AsideComponent from "@/components/RegularUser/AsideComponent.vue";
 import router from "@/router";
-import {useAppStore} from "@/stores/state";
+import {useAppStore, useUserStore} from "@/stores/state";
+import {reactive} from "vue-demi";
+import {request} from "@/utils/request";
+import {getCookie} from "@/utils/cookie";
 
 const appStore = useAppStore()
 
@@ -53,7 +57,9 @@ const introduceRouter = ref('introduceOne')
 const learnRouter = ref('learnOne')
 
 defineProps(["subject"])
+const store = useUserStore()
 
+const userId = getCookie("userId")
 const handleSelect = (key: string, keyPath: string[]) => {
   subjectType.value= key
   router.push({path: '/regularUser'})
@@ -86,6 +92,13 @@ const changeAside = (aside_index: string) => {
 // <!-- 主体组件 -->
 const userName = ref('YehWang')
 
+// const questionList:questionInfo[] = reactive([])
+// onMounted(()=>{
+//   request.get("/driveservice/question/generateExercise1").then((res)=>{
+//     questionList.push(...res.data.data.objects1)
+//     console.log(questionList)
+//   })
+// })
 
 </script>
 

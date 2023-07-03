@@ -3,13 +3,13 @@
     <div class="container" v-show="changeTab">
       <h1>Login</h1>
       <el-form-item class="item" label="User Type">
-        <el-select v-model="form.grade" placeholder="please select your identity">
+        <el-select v-model="form.role" placeholder="please select your identity">
           <el-option v-for="item in optionsState" :key="item.value" :label="item.label" :value="item.value"/>
         </el-select>
       </el-form-item>
       <el-form :model="form" ref="form" :rules="rules" label-width="80px">
-        <el-form-item label="Username" prop="username">
-          <el-input class="input-border-style" v-model="form.username"></el-input>
+        <el-form-item label="Username" prop="phone">
+          <el-input class="input-border-style" v-model="form.phone"></el-input>
         </el-form-item>
         <el-form-item label="Password" prop="password">
           <el-input type="password" show-password v-model="form.password"></el-input>
@@ -53,7 +53,7 @@
         </el-row>
         <el-row>
           <el-col :span="13">
-            <el-form-item label="Address" prop="address">
+            <el-form-item label="Address" prop="adress">
               <elui-china-area-dht isall :leave="3" @change="onChange"></elui-china-area-dht>
             </el-form-item>
           </el-col>
@@ -68,9 +68,9 @@
         </el-row>
         <el-row>
           <el-col :span="12">
-            <el-form-item label="Your Photo" prop="personalCard">
+            <el-form-item label="Your Photo" prop="picture">
               <el-upload
-                  v-model="signForm.personalCard"
+                  v-model="signForm.picture"
                   class="upload-demo"
                   :http-request="upload"
                   :before-remove="beforeRemove"
@@ -97,7 +97,7 @@
           </el-col>
         </el-row>
         <el-form-item>
-          <el-button id="okButton" type="success" icon="check" @click="handleRegister('form')">Submit</el-button>
+          <el-button id="okButton" type="success" icon="check" @click="handleRegister">Submit</el-button>
           <el-button id="Res" type="primary" icon="back" @click="showLogin">Back</el-button>
         </el-form-item>
       </el-form>
@@ -118,7 +118,9 @@ import OSS from "ali-oss";
 import router from "@/router";
 import {acessKey, acessKeyId} from "@/utils/apiKey";
 import {CardType, Gender} from "@/utils/gender";
-import * as string_decoder from "string_decoder";
+import {request} from "@/utils/request";
+import {useUserStore} from "@/stores/state";
+import {setCookie} from "@/utils/cookie";
 
 export default defineComponent({
   name: 'Login',
@@ -131,58 +133,62 @@ export default defineComponent({
       accessKeySecret: acessKey,
       bucket: "onismyeh",
     })
+    const store = useUserStore()
     return {
       preview: [],
       showImageViewer: false,
       client,
+      userId: '',  // 返回的用户id
       optionsState: [
         {
-          value: 0,
+          value: 1,
           label: 'super administrator'
         },
         {
-          value: 1,
-          label: 'organization administrator'
+          value: 2,
+          label: 'coach'
         },
         {
-          value: 2,
+          value: 3,
           label: 'regular user'
         }
       ],
       form: {
-        username: '',
+        phone: '',
         password: '',
-        grade: 0
+        role: 0
       },
       signForm: {
         id:"",  // id
         name: '', // 姓名
         age: 0,  // 年龄
         gender: Gender.male,  // 性别
-        address: '',  // 地址
+        adress: '',  // 地址
         personCard: '',  // 身份证照片
         type: CardType.typeTwo,  // 报考类型
         phone: '',  // 手机号
+        email: '',  // 邮箱
         file: '',  // 上传文件
-        personalCard: '',  // 个人照片
+        picture: '',  // 个人照片
         createTime: '',  // 创建时间
       },
       changeTab: true,
       rules: {
-        username: [
+        phone: [
           {required: true, message: 'Please input your username', trigger: 'blur'}
         ],
         password: [
           {required: true, message: 'Please input your password', trigger: 'blur'}
         ],
       },
-      chinaData
+      chinaData,
+      store
     };
   },
   watch: {
   },
   mounted() {
-    this.form.grade = this.optionsState[2].value
+    this.form.role = this.optionsState[2].value
   },
   setup() {
     const fileList = ref<UploadUserFile[]>([]);
@@ -196,39 +202,60 @@ export default defineComponent({
       return time.getFullYear()+"-"+time.getMonth()+"-"+time.getDate()+" "+time.getHours()+":"+time.getMinutes()+":"+time.getSeconds()
     },
     handleSubmit(form) {
-      // console.log(this.form)
-      // // Submit form data to server
-      // console.log('Username:', this.form.username);
-      // console.log('Password:', this.form.password);
+      // Submit form data to server
+      // console.log(this.form);
+      // request.post("/driveservice/login/login",this.form).then(res=>{
+      //   this.userId = res.data.data.message
+      //   if(res.data.message=='成功'){
+      //     if(this.form.role==1){
+      //
+      //     } else if (this.form.role==2){
+      //
+      //     } else {
+      //       // this.store.setUserId(this.userId)
+      //       setCookie('userId',this.userId)
+      //       router.push({path: '/regularUser'})
+      //     }
+      //   }
+      // })
       router.push({path: '/regularUser'})
     },
-    handleRegister(form) {
+    handleRegister() {
       this.signForm.createTime= this.getNowTime()
       this.signForm.file = this.fileList[0].name
       console.log(this.signForm)
+      request.post('/driveservice/application/add',this.signForm).then(res=>{
+        console.log(res.data)
+        if(res.data.code==200){
+          ElMessage({
+            message: 'Register successfully',
+            type: 'success'
+          })
+        }
+      })
     },
     onChange(val) {
-      this.signForm.address = this.chinaData[val[0]].label + '/' + this.chinaData[val[1]].label + '/' + this.chinaData[val[2]].label
+      this.signForm.adress = this.chinaData[val[0]].label + '/' + this.chinaData[val[1]].label + '/' + this.chinaData[val[2]].label
     },
     resDialog() {
       this.changeTab = false
       this.form = {
-        username: '',
+        phone: '',
         password: '',
-        grade: 0
+        role: 0
       }
     },
     showLogin() {
       this.changeTab = true
       this.form = {
-        username: '',
+        phone: '',
         password: '',
-        grade: 0
+        role: 0
       }
     },
     upload(uploadFile) {
       this.client.put("/pictures/"+uploadFile.file.name, uploadFile.file).then(res => {
-        this.signForm.personalCard = res.url
+        this.signForm.picture = res.url
         ElMessage({
           message: 'Upload successfully',
           type: 'success'
@@ -238,7 +265,7 @@ export default defineComponent({
       })
     },
     onPreview(file){
-      this.preview.push(this.signForm.personalCard)
+      this.preview.push(this.signForm.picture)
       this.showImageViewer = true
     },
     handleExceed(files, uploadFiles) {
