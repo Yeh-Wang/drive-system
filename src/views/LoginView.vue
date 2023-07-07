@@ -9,10 +9,10 @@
       </el-form-item>
       <el-form :model="form" ref="form" :rules="rules" label-width="80px">
         <el-form-item label="Username" prop="phone">
-          <el-input class="input-border-style" v-model="form.phone"></el-input>
+          <el-input style="width: 250px" class="input-border-style" v-model="form.phone"></el-input>
         </el-form-item>
         <el-form-item label="Password" prop="password">
-          <el-input type="password" show-password v-model="form.password"></el-input>
+          <el-input style="width: 250px" type="password" show-password v-model="form.password"></el-input>
         </el-form-item>
         <el-form-item>
           <el-button id="okButton" type="primary" @click="handleSubmit('form')">Login</el-button>
@@ -38,7 +38,7 @@
         <el-row>
           <el-col :span="12">
             <el-form-item label="Gender" prop="gender">
-              <el-select v-model="signForm.gender" placeholder="please select your gender">
+              <el-select v-model="signForm.sex" placeholder="please select your gender">
                 <el-option label="female" value="男"/>
                 <el-option label="male" value="女"/>
                 <el-option label="other" value="其他"/>
@@ -48,6 +48,18 @@
           <el-col :span="12">
             <el-form-item label="Phone" prop="phone">
               <el-input v-model="signForm.phone" maxlength="11" show-word-limit></el-input>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="person Card" prop="personCard">
+              <el-input v-model="signForm.personCard" maxlength="13" show-word-limit></el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="email" prop="email">
+              <el-input v-model="signForm.email"></el-input>
             </el-form-item>
           </el-col>
         </el-row>
@@ -85,9 +97,9 @@
             <el-form-item label="Health certificate" prop="file">
               <el-upload
                   v-model:file-list="fileList"
-                  :auto-upload="false"
                   action="https://run.mocky.io/v3/9d059bf9-4660-45f2-925d-ce80ad6c4d15"
                   class="upload-demo"
+                  :http-request="uploadFile"
                   :before-remove="beforeRemove"
                   :limit="1"
                   :on-exceed="handleExceed">
@@ -120,7 +132,9 @@ import {acessKey, acessKeyId} from "@/utils/apiKey";
 import {CardType, Gender} from "@/utils/gender";
 import {request} from "@/utils/request";
 import {useUserStore} from "@/stores/state";
-import {setCookie} from "@/utils/cookie";
+import {getCookie, setCookie} from "@/utils/cookie";
+import axios from "axios";
+import {watch} from "vue-demi";
 
 export default defineComponent({
   name: 'Login',
@@ -162,7 +176,7 @@ export default defineComponent({
         id:"",  // id
         name: '', // 姓名
         age: 0,  // 年龄
-        gender: Gender.male,  // 性别
+        sex: Gender.male,  // 性别
         adress: '',  // 地址
         personCard: '',  // 身份证照片
         type: CardType.typeTwo,  // 报考类型
@@ -170,7 +184,8 @@ export default defineComponent({
         email: '',  // 邮箱
         file: '',  // 上传文件
         picture: '',  // 个人照片
-        createTime: '',  // 创建时间
+        gmtCreate: '',  // 创建时间
+        isPass: 0,  // 是否通过审核
       },
       changeTab: true,
       rules: {
@@ -204,34 +219,51 @@ export default defineComponent({
     handleSubmit(form) {
       // Submit form data to server
       // console.log(this.form);
-      // request.post("/driveservice/login/login",this.form).then(res=>{
-      //   this.userId = res.data.data.message
-      //   if(res.data.message=='成功'){
-      //     if(this.form.role==1){
-      //
-      //     } else if (this.form.role==2){
-      //
-      //     } else {
-      //       // this.store.setUserId(this.userId)
-      //       setCookie('userId',this.userId)
-      //       router.push({path: '/regularUser'})
-      //     }
-      //   }
-      // })
-      router.push({path: '/regularUser'})
+      request.post("/driveservice/login/login",this.form).then(res=>{
+        this.userId = res.data.data.message.roleId
+        if(res.data.message=='成功'){
+          if(this.form.role==1){
+
+          } else if (this.form.role==2){
+
+          } else {
+            this.store.setUserId(this.userId)
+            this.store.setUserInfo(res.data.data.message)
+            setCookie('userId',this.userId)
+            router.push({path: '/regularUser'})
+          }
+        }
+      })
     },
     handleRegister() {
-      this.signForm.createTime= this.getNowTime()
-      this.signForm.file = this.fileList[0].name
-      console.log(this.signForm)
-      request.post('/driveservice/application/add',this.signForm).then(res=>{
-        console.log(res.data)
-        if(res.data.code==200){
-          ElMessage({
-            message: 'Register successfully',
-            type: 'success'
-          })
+      // this.signForm.createTime= this.getNowTime()
+      // this.signForm.file = this.fileList[0].name
+      //判断邮箱格式是否正确
+      const reg = /^([a-zA-Z]|[0-9])(\w|\-)+@[a-zA-Z0-9]+\.([a-zA-Z]{2,4})$/;
+      if(!reg.test(this.signForm.email)){
+        ElMessage.error('Please enter the correct email format')
+      } else{
+        request.post('/driveservice/application/add',this.signForm).then(res=>{
+          console.log(res.data)
+          if(res.data.code==20000){
+            ElMessage({
+              message: 'Register successfully',
+              type: 'success'
+            })
+          }
+        })
+      }
+    },
+    uploadFile(file){
+      // console.log(file.file)
+      const formData = new FormData()
+      formData.append('file',file.file)
+      axios.post("http://192.168.131.110:8001/driveservice/application/Upload",formData,{
+        headers: {
+          'Content-Type': 'multipart/form-data'
         }
+      }).then(res=>{
+        this.signForm.file = res.data.data.path
       })
     },
     onChange(val) {

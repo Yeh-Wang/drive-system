@@ -44,23 +44,18 @@
 </template>
 
 <script setup lang="ts">
-import {ref} from 'vue';
+import {ref,reactive} from 'vue';
 import {ElCalendar, ElButton, ElMessage} from 'element-plus';
 import {useDraggable} from "@vueuse/core";
 import {useRouter} from "vue-router";
 import type {bookExam} from "@/utils/data-entity";
-import {reactive} from "vue-demi";
 import {request} from "@/utils/request";
+import {useUserStore} from "@/stores/state";
 
 const router = useRouter();
 const currentSubject = router.currentRoute.value.params.subjectId;
 
 const selectedDate = ref(""); // 选择的日期
-const bookExam = ref({ // 预约考试信息
-  bookDate: new Date().toDateString(),
-  bookPlace: "??",
-  bookSubject: currentSubject
-})
 const bookExamInfo:bookExam = reactive({
   id: "",
   name: "",
@@ -90,7 +85,12 @@ const {x, y, style} = useDraggable(el, {
   initialValue: {x: 200, y: 200},
 })
 const submitForm = () => {
-  if (!selectedDate.value) {
+  if(useUserStore().getStudentInfo().learnProgress != Number(currentSubject) ){
+    ElMessage({
+      message: '您当前不能预约该科目考试',
+      type: 'warning'
+    });
+  } else if (!selectedDate.value) {
     // 如果没有选择日期，进行相应的提示
     ElMessage({
       message: '请选择日期',
@@ -98,9 +98,11 @@ const submitForm = () => {
     });
     return;
   }else{
-    console.log(bookExamInfo);
     request.post("/driveservice/book-exam/bookExam/"+"1",bookExamInfo).then(res=>{
-      console.log(res.data.message);
+      ElMessage({
+        message: res.data.data.message,
+        type: 'success'
+      });
     })
   }
 

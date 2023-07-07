@@ -1,6 +1,23 @@
 <script setup lang="ts">
 
 import RegularUser from "@/views/RegularUser.vue";
+import {useUserStore} from "@/stores/state";
+
+if(sessionStorage.getItem("userId")){
+  useUserStore().userId = sessionStorage.getItem("userId")
+}
+if (sessionStorage.getItem("studentInfo")){
+  useUserStore().setStudentInfo(JSON.parse(sessionStorage.getItem("studentInfo")!))
+}
+if (sessionStorage.getItem("userInfo")){
+  useUserStore().setUserInfo(JSON.parse(sessionStorage.getItem("userInfo")))
+}
+
+window.addEventListener('beforeunload',()=>{
+  sessionStorage.setItem("userId",JSON.stringify(useUserStore().userId))
+  sessionStorage.setItem("studentInfo",JSON.stringify(useUserStore().getStudentInfo()))
+  sessionStorage.setItem("userInfo",JSON.stringify(useUserStore().getUserInfo()))
+})
 </script>
 
 <template>

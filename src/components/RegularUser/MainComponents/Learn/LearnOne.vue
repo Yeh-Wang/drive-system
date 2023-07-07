@@ -2,8 +2,10 @@
 import {ref} from "vue";
 import LearnVideoView from "@/components/RegularUser/MainComponents/Learn/LearnOneView/LearnVideoView.vue";
 import LearnQuestionView from "@/components/RegularUser/MainComponents/Learn/LearnOneView/LearnQuestionView.vue";
+import {useUserStore} from "@/stores/state";
 
 const props = defineProps(["subject"])
+const store = useUserStore()
 
 //视频学习时间
 const LearnedTime = ref("12:00")
@@ -14,6 +16,10 @@ const showLearn = ref(false)
 //视频学习界面是否展示
 const showVideoLearn = ref(true)
 
+//获取学时
+const getNeedTime = () =>{
+}
+
 //vide-card button click
 const learnVideo = () =>{
   showLearn.value = true
@@ -23,6 +29,7 @@ const learnVideo = () =>{
 const learnQuestion = () =>{
   showLearn.value = true
   showVideoLearn.value = false
+  store.start()
 }
 //back button click
 const backVideo = (learnTime:string) =>{
@@ -38,13 +45,13 @@ const backQuestion = (learnTime:string) =>{
 <template>
   <div v-show="showLearn">
     <LearnVideoView v-if="showVideoLearn" @event1="backVideo" :subject="props.subject"/>
-    <LearnQuestionView v-else @event2="backQuestion" :subject="props.subject"/>
+    <LearnQuestionView v-else @event2="backQuestion" :subject="props.subject" />
   </div>
 
   <div v-show="!showLearn">
   <div class="learned-time">
     <p>Learned time is: <el-icon><AlarmClock /></el-icon>
-      <el-text type="success">{{ LearnedTime }}</el-text> ,
+      <el-text type="success">{{ store.getStudentInfo().learnTime }} </el-text> minutes,
       You need to study a total of <el-icon><GoldMedal /></el-icon>
       <el-text type="danger">{{ requireTime }}</el-text> hours</p>
   </div>

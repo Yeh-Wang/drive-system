@@ -6,10 +6,11 @@ export interface user {
     name: string,           //用户名
     sex: string,           //性别
     phone: string,           //电话
-    username: string,           //账号
+    age: number,           //年龄
     password: string,           //密码
     role: string,           //角色
     avatar: string,           //头像
+    roleId: string,           //角色id
 }
 
 //报名表信息
@@ -45,14 +46,14 @@ export interface student {
     remark: string,           //备注
     coachId: string,           //教练id
     learnTime: string,           //当前科目学习时间
-    learnProgress: string,           //科目学习进度
+    learnProgress: number,           //科目学习进度
 }
 
 //科目一信息
 export interface subjectOne {
     id: string,             //科目一id
     chapterId: string,      //章节id
-    needTime: string,       //需要时间
+    needTime: number,       //需要时间
     type: string,           //驾照类型
 }
 
@@ -60,7 +61,7 @@ export interface subjectOne {
 export interface subjectTwo {
     id: string,             //科目二id
     chapterId: string,      //章节id
-    needTime: string,       //需要时间
+    needTime: number,       //需要时间
     type: string,           //驾照类型
 }
 
@@ -68,7 +69,7 @@ export interface subjectTwo {
 export interface subjectThree {
     id: string,             //科目三id
     chapterId: string,      //章节id
-    needTime: string,       //需要时间
+    needTime: number,       //需要时间
     type: string,           //驾照类型
 }
 
@@ -76,7 +77,7 @@ export interface subjectThree {
 export interface subjectFour {
     id: string,             //科目四id
     chapterId: string,      //章节id
-    needTime: string,       //需要时间
+    needTime: number,       //需要时间
     type: string,           //驾照类型
 }
 
@@ -108,11 +109,6 @@ export interface subjectFour {
 //     false = '错误',
 // }
 
-//视频信息
-export interface video {
-    id: string,             //视频id
-    videoAddress: string,   //视频地址
-}
 
 // //预约考试信息
 // export interface bookExam {
@@ -180,8 +176,12 @@ export interface examPaper {
 export interface chapter {
     id: string,             //章节id
     chapterName: string,    //章节名称
-    videoId: string,        //视频id
-    subject: string,        //科目
+    videoPlayAuth:videoInfo[],//视频播放凭证
+}
+
+export interface videoInfo {
+    key: string,             //视频key
+    value: string,           //视频value
 }
 
 //题目信息
@@ -203,5 +203,16 @@ export interface questionOptionInfo {
     questionId: string,//题目id
 }
 
+
+//预约练车信息
+export interface bookCar {
+    id: string,           //预约练车id
+    studentId: string,         //预约人id
+    coachId: string,         //教练id
+    // coachName: string,         //教练姓名
+    time: string,              //预约时间
+    type: string,              //预约科目  科目二 科目三
+    isPass: string,            //是否通过  已通过 未通过
+}
 
 
